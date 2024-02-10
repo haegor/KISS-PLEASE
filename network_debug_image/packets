@@ -1,0 +1,16 @@
+# Перечень пакетв для list2chroot.sh
+
+# Вместо bash и sh busybox-а
+dash
+
+#dpkg -S /bin/netstat
+#net-tools: /bin/netstat
+net-tools
+
+#dpkg -S $(which dig)
+#bind9-dnsutils: /usr/bin/dig
+bind9-dnsutils
+
+#haegor@vetinari:~/dev/timeline/dnsutils$ dpkg -S /bin/nc.openbsd
+#netcat-openbsd: /bin/nc.openbsd
+netcat-openbsd
