@@ -1,0 +1,24 @@
+apiVersion: apps/v1
+kind: DaemonSet
+metadata:
+  name: alpine-ds
+  labels:
+    app: alpine
+spec:
+  selector:
+    matchExpressions:
+      - key: app
+        operator: In
+        values:
+          - alpine
+  template:
+    metadata:
+      name: alpine-pod
+      labels:
+        app: alpine
+    spec:
+      containers:
+      - name: alpine-cont
+        image: alpine
+        command: ["sleep", "infinity"]
+
