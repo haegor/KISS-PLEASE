@@ -1,0 +1,1 @@
+./_scripts/deploy-all.sh
