@@ -1,6 +1,11 @@
 #!/bin/bash
 
-#sudo -i
+if [ $2 ]
+then
+  cluster_subnet="$2"
+else
+  cluster_subnet='10.82.0.0/16'
+fi
 
 case $1 in
 'look'|'show'|'sh')			# Осмотреться
@@ -12,7 +17,7 @@ case $1 in
 	k3s kubectl get nodes -o wide
 ;;
 'get'|'pull')				# Стянуть index.sh
-  curl -sfL https://get.k3s.io
+  curl -sfL "https://get.k3s.io"
 ;;
 'stop')					# Остановить всё что связано с k3s
 	systemctl stop k3s
@@ -26,7 +31,7 @@ case $1 in
 	systemctl status k3s
 ;;
 'init')					#
-	k3s server --cluster-init --cluster-cidr '10.82.0.0/16'
+	k3s server --cluster-init --cluster-cidr "$cluster_subnet"
 ;;
 'reset')				#
 	k3s server --cluster-reset
@@ -35,16 +40,15 @@ case $1 in
 	cat ./index.sh | sh -s - server --cluster-init
 ;;
 'install')				#
-	cat ./index.sh | sh -s - server --cluster-cidr=10.82.0.0/16
+	cat ./index.sh | sh -s - server --cluster-cidr="$cluster_subnet"
 ;;
 'uninstall')				#
-	/usr/local/bin/k3s-uninstall.sh
+	k3s-uninstall.sh
 ;;
 'test')					# excluder
 # Спец. пункт для экспериментов
-	k3s server --cluster-cidr '10.82.0.0/16'
+	k3s server --cluster-cidr "$cluster_subnet"
 	# --node-ip 192.168.0.100
-	# --cluster-cidr '10.82.0.0/16'
 ;;
 '--help'|'-help'|'help'|'-h'|*|'')	# Автопомощь. Мы тут.
   echo
