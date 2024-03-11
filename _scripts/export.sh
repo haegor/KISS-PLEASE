@@ -3,7 +3,7 @@
 # 2023 (c) haegor
 #
 
-. ./settings
+source ./settings.sh || { echo "Файл настроек не обнаружен. Останов."; exit 0; }
 
 ${DKR} export ${CONTAINER} --output ${CONTAINER}.tar
 gzip ${CONTAINER}.tar

@@ -1,6 +1,6 @@
 #!/bin/bash
 
-. ./settings.sh
+source ./settings.sh || { echo "Файл настроек не обнаружен. Останов."; exit 0; }
 
 docker-compose down
 

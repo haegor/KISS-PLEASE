@@ -3,12 +3,12 @@
 # 2023 (c) haegor
 #
 
-. ./settings.sh
+source ./settings.sh || { echo "Файл настроек не обнаружен. Останов."; exit 0; }
 
 ./rm.sh
 
 ${DKR} run -itd \
-	--name ${CONTAINER} \
+        --name ${CONTAINER} \
         --volume="${VOLUME_HOST}:${VOLUME_CONT}" \
-	${ENVFILE} \
-	"${IMAGE}"
+        ${ENVFILE} \
+        "${IMAGE}"

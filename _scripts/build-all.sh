@@ -5,7 +5,8 @@
 # 2023 (c) haegor
 #
 
-[ -f "./settings.sh" ] && . ./settings.sh
+[ -f "./settings.sh" ] && source ./settings.sh
+# source ./settings.sh || { echo "Файл настроек не обнаружен. Останов."; exit 0; }
 
 project_dir="$(pwd)"
 subdirs=$(find "${project_dir}" -maxdepth 1 -type d)

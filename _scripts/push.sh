@@ -3,6 +3,10 @@
 # 2023 (c) haegor
 #
 
-. ./settings.sh
+source ./settings.sh || { echo "Файл настроек не обнаружен. Останов."; exit 0; }
 
-${DKR} push --disable-content-trust "${IMAGE}"
+[ "${IMAGE:0:5}" == 'https' ] \
+  && ${DKR} push "${IMAGE}" \
+  || ${DKR} push --disable-content-trust "${IMAGE}"
+
+

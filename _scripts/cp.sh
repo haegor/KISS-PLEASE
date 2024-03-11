@@ -3,7 +3,7 @@
 # 2023 (c) haegor
 #
 
-. ./settings.sh
+source ./settings.sh || { echo "Файл настроек не обнаружен. Останов."; exit 0; }
 
 if [ "$1" ]
 then
