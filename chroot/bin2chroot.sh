@@ -3,7 +3,13 @@
 # Рекурсивно копирует указанный бинарник и все его зависимости с сохранением
 # путей в указанную папку.
 #
+# В качестве параметров принимает:
+# $1 - бинарник, доступный через пути из $PATH. По умолчанию - bash
+# [$2] - папка, куда следует положить chroot. По умолчанию ./work_dir
+#
 # 2023 (c) haegor
+#
+# TODO: сделать нормальную помощь.
 #
 
 # Настройки по умолчанию
@@ -14,20 +20,20 @@ cp='sudo cp'
 mkdir='sudo mkdir'
 
 ##### bin arguments ############################################################
-if [ "$1" ]
+if [ -n "$1" ]
 then
-    if [ -f "$1" ] || [ -L "$1" ]	# Это прямое указание пути до файла?
-    then
-        target_command="$1"
-    else				# Значит относительное
-        target_command="$(which $1)"
+  if [ -f "$1" ] || [ -L "$1" ]		# Это прямое указание пути до файла?
+  then
+    target_command="$1"
+  else					# Значит относительное
+    target_command="$(which $1)"
 
-        if [ ! "${target_command}" ]    # Ну значит не относительная
-        then
-            echo "Невозможно найти указанный elf или библиотеку"
-            exit 0			
-        fi
+    if [ ! "${target_command}" ]	# Ну значит не относительное
+    then
+      echo "Невозможно найти указанный elf или библиотеку"
+      exit 0
     fi
+  fi
 else
     target_command="${default_binary}"	# И нечего мучаться
 fi
@@ -36,7 +42,7 @@ echo "Обрабатываемая комманда: ${target_command}"
 
 ##### dir arguments ############################################################
 
-if [ "$2" ]
+if [ -n "$2" ]
 then
     if [ -d "$2" ] || [ -L "$2" ]
     then
@@ -46,23 +52,21 @@ then
       echo "Ошибка. В качестве директории назначения указан обычный файл."
       exit 0
     else				# Что-то не существующее
-      target_dir="$2"			
+      target_dir="$2"
       [ ! -d "${target_dir}" ] && ${mkdir} -p "${target_dir}"
     fi
 else
     target_dir="${default_dir}"		# default
-    [ ! -d "${target_dir}" ] && ${mkdir} -p "${target_dir}"
-fi
 
-##### other arguments ##########################################################
-
-if [ "$3" ]
-then
-    echo "Слишком много аргументов."
-    exit 0
+    [ ! -d "${target_dir}" ] \
+      && ${mkdir} -p "${target_dir}"
 fi
 
 echo "Рабочая директория: ${target_dir}"
+
+##### other arguments ##########################################################
+
+[ -n "$3" ] && { echo "Слишком много аргументов."; exit 0; }
 
 ##### Отдел функций ############################################################
 
@@ -71,23 +75,23 @@ f_dependencies () {
 }
 
 f_parse_dep_line () {
-   full_path=$(echo "$1" | grep -P "^/")
-   shared=$(echo "$1" | grep '=>')
-   staticly_linked=$(echo "$1" | grep 'statically linked')
+   local full_path=$(echo "$1" | grep -P "^/")
+   local shared=$(echo "$1" | grep '=>')
+   local staticly_linked=$(echo "$1" | grep 'statically linked')
 
-   if [ "${full_path}" ]
+   if [ -n "${full_path}" ]
    then
      intermidiate=$(echo "${full_path}")
      echo "${intermidiate:0:-21}"
    fi
 
-   if [ "${shared}" ]
+   if [ -n "${shared}" ]
    then
      intermidiate=$(echo "${shared}" | cut -f2 -d'>' )
      echo "${intermidiate:1:-21}"
    fi
 
-   if [ "${staticly_linked}" ]
+   if [ -n "${staticly_linked}" ]
    then
      echo ''
    fi
@@ -114,21 +118,17 @@ f_stack_count () {
 
 # Проверяет присутствие элемента в списке
 f_check4duplicity () {
-    value="$1"
+  local value="$1"
 
-    let dupes_top_index=${#dupes[@]}-1
+  let dupes_top_index=${#dupes[@]}-1
 
-    found="false"
+  found="false"
 
-    for i in $(seq 0 ${dupes_top_index})
-    do
-	if [ "${dupes[i]}" == "${value}" ]
-	then
-	    found="true"
-	    break
-	fi
-    done
-    echo ${found}
+  for i in $(seq 0 ${dupes_top_index})
+  do
+    [ "${dupes[i]}" == "${value}" ] && { found="true"; break; }
+  done
+  echo ${found}
 }
 
 # Функция исключительно для дебага
@@ -166,10 +166,10 @@ do
     # Добавляем ещё один массив, для уникальных бинарников
     if [ "$(f_check4duplicity ${stack_top_value})" == 'true' ]
     then
-      unset stack[$(f_stack_top_index)]		# Удаляем из стека
-      continue
+        unset stack[$(f_stack_top_index)]	# Удаляем из стека
+        continue
     else
-      dupes[${#dupes[@]}]=${stack_top_value}	# Добавляем в обработанные
+        dupes[${#dupes[@]}]=${stack_top_value}	# Добавляем в обработанные
     fi
 
     echo "Копируем: ${stack_top_value}"
@@ -178,7 +178,7 @@ do
 
     #D echo "--- ПОСЛЕ УДАЛЕНИЯ : ---" && echo "$(f_look_around_stack)"
 
-    deps=$( f_dependencies "${stack_top_value}" )
+    deps=$(f_dependencies "${stack_top_value}")
     [ ! -n "${deps}" ] && continue
 
     while read LINE
@@ -186,6 +186,7 @@ do
         #D echo "-${LINE}-"
 
         dep_line=`f_parse_dep_line "${LINE}"`
+
         [ ! "${dep_line}" ] && continue
 
         stack_count=$(f_stack_count)		# "Берём номерок"

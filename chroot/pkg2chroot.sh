@@ -15,13 +15,10 @@ cp='sudo cp'
 mkdir='sudo mkdir'
 dpkg='sudo dpkg'
 
-[ "$1" ] && pkg="$1" || pkg='coreutils'
-[ "$2" ] && target_dir="$2" || target_dir='./work_dir'
-if [ "$3" ]
-then
-  echo "Слишком много аргументов"
-  exit 0
-fi
+[ -n "$1" ] && pkg="$1" || pkg='coreutils'
+[ -n "$2" ] && target_dir="$2" || target_dir='./work_dir'
+
+[ -n "$3" ] && { echo "Слишком много аргументов"; exit 0; }
 
 bin2chroot='./bin2chroot.sh'
 
@@ -37,46 +34,46 @@ while read i
 do
     if [ -d "${i}" ]
     then
-	${mkdir} -p "${target_dir}/${i}" && \
+        ${mkdir} -p "${target_dir}/${i}" && \
             echo "Создана директория: ${i}"
-	continue
+        continue
     fi
 
     if [ -L "${i}" ]
     then
         f_link_copy "${i}" && \
-	    echo "Скопирована ссылка: ${i}"
+          echo "Скопирована ссылка: ${i}"
         continue
     fi
 
     if [ -x "${i}" ]
     then
-	# Примеры того как "система" "видит" исполняемые скрипты:
-	#
-	# haegor@vetinari:~$ file /usr/bin/bashbug
-	# /usr/bin/bashbug: POSIX shell script, ASCII text executable
-	#
-	# haegor@vetinari:~$ file /usr/bin/mesa-overlay-control.py
-	# /usr/bin/mesa-overlay-control.py: Python script, ASCII text executable
-	#
-	# haegor@vetinari:~$ file /usr/bin/isohybrid.pl
-	# /usr/bin/isohybrid.pl: Perl script text executable
-        #
-        # Общий знаменатель: 'text executable'.
+      # Примеры того как "система" "видит" исполняемые скрипты:
+      #
+      # haegor@vetinari:~$ file /usr/bin/bashbug
+      # /usr/bin/bashbug: POSIX shell script, ASCII text executable
+      #
+      # haegor@vetinari:~$ file /usr/bin/mesa-overlay-control.py
+      # /usr/bin/mesa-overlay-control.py: Python script, ASCII text executable
+      #
+      # haegor@vetinari:~$ file /usr/bin/isohybrid.pl
+      # /usr/bin/isohybrid.pl: Perl script text executable
+      #
+      # Общий знаменатель: 'text executable'.
 
-	text_executable='' && text_executable="$(file ${i} | grep 'text executable')"
-	if [ "$text_executable" ]
-	then
-            f_file_copy "${i}" && \
-		echo "Скопирован скрипт: ${i}"
-	    continue
-	fi
+      text_executable='' && text_executable="$(file ${i} | grep 'text executable')"
+      if [ "$text_executable" ]
+      then
+        f_file_copy "${i}" && \
+          echo "Скопирован скрипт: ${i}"
+        continue
+      fi
 
-	${bin2chroot} "${i}" "${target_dir}"
-	continue
+      ${bin2chroot} "${i}" "${target_dir}"
+      continue
     fi
 
     f_file_copy "${i}" && \
-	echo "Скопирован файл: ${i}"
+      echo "Скопирован файл: ${i}"
 
 done < <(${dpkg} -L "${pkg}")

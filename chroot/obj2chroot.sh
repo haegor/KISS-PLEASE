@@ -7,7 +7,7 @@
 
 cp='sudo cp'
 
-if [ "$1" ]
+if [ -n "$1" ]
 then
     if [ -f "$1" ] || [ -d "$1" ] || [ -L "$1" ]
     then
@@ -21,11 +21,8 @@ else
     exit 0
 fi
 
-if [ "$2" ]
-then
-    work_dir="$2"
-else
-    work_dir="./work_dir"
-fi
+[ -n "$2" ] \
+  && work_dir="$2" \
+  || work_dir="./work_dir"
 
 ${cp} --recursive --parents "$copy_obj" "${work_dir}"

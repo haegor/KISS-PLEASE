@@ -8,7 +8,7 @@
 
 [ -f "./settings.sh" ] && . ./settings.sh
 
-if [ ! -n "$1" ] && [ ! -n "${work_dir}" ]
+if [ -z "$1" ] && [ -z "${work_dir}" ]
 then
     work_dir='/mnt/dev'			# default
 elif [ -n "$1" ]
