@@ -1,4 +1,8 @@
 #!/bin/bash
+#
+# 2023 (c) haegor
+#
+
 
 deploys=$(find ./ -mindepth 2 -maxdepth 2 -type l -name "deploy.sh")
 
