@@ -1,1 +1,0 @@
-../../KISS-PEACE/chroot/list2chroot.sh

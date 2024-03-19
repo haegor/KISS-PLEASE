@@ -1,0 +1,1 @@
+../../chroot/pkg2chroot.sh

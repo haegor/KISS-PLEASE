@@ -1,1 +1,0 @@
-../../KISS-PEACE/chroot/pkg2chroot.sh
