@@ -7,6 +7,6 @@
 #
 
 find "../../" -maxdepth 1 -type f -iname "*.sh" ! -iname "docker-entrypoint.sh" ! -iname "*-all.sh" ! -iname "*-old.sh" -exec \
-	bash -c "echo {} | sed 's=../../==' | xargs --no-run-if-empty -I'}{' ln -s '../_scripts/}{' './}{' && echo Ссылка на {} создана"  \;
+  bash -c "echo {} | sed 's=../../==' | xargs --no-run-if-empty -I'}{' ln -s '../_scripts/}{' './}{' && echo Ссылка на {} создана" \;
 
 
