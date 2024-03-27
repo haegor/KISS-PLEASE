@@ -8,7 +8,7 @@
 # Скрипт создан для быстрого создания chroot-ов и изначально ориентирован на
 # исполнимые файлы. Так что если он не скопирует какой-то man, то это скорее фича.
 #
-# 2023 (c) haegor
+# 2023-2024 (c) haegor
 #
 
 cp='sudo cp'
@@ -23,26 +23,30 @@ dpkg='sudo dpkg'
 bin2chroot='./bin2chroot.sh'
 
 f_file_copy () {
-  ${cp} --parents --dereference --update "$1" "${target_dir}"
+  $cp --parents --dereference --update "$1" "${target_dir}" || return 1
+  return 0
 }
 
 f_link_copy () {
-  ${cp} --parents --no-dereference "$1" "${target_dir}"
+  $cp --parents --no-dereference "$1" "${target_dir}" || return 1
+  return 0
 }
 
 while read i
 do
     if [ -d "${i}" ]
     then
-        ${mkdir} -p "${target_dir}/${i}" && \
-            echo "Создана директория: ${i}"
+        $mkdir -p "${target_dir}/${i}" \
+          && echo "Создана директория: ${i}" \
+          || echo "ОШИБКА при создании директории: ${i}"
         continue
     fi
 
     if [ -L "${i}" ]
     then
-        f_link_copy "${i}" && \
-          echo "Скопирована ссылка: ${i}"
+        f_link_copy "${i}" \
+          && echo "Скопирована ссылка: ${i}" \
+          || echo "ОШИБКА при копировании ссылки: ${i}"
         continue
     fi
 
@@ -64,16 +68,18 @@ do
       text_executable='' && text_executable="$(file ${i} | grep 'text executable')"
       if [ "$text_executable" ]
       then
-        f_file_copy "${i}" && \
-          echo "Скопирован скрипт: ${i}"
+        f_file_copy "${i}" \
+          && echo "Скопирован скрипт: ${i}" \
+          || echo "ОШИБКА при копировании скрипта: ${i}"
         continue
       fi
 
-      ${bin2chroot} "${i}" "${target_dir}"
+      $bin2chroot "${i}" "${target_dir}"
       continue
     fi
 
-    f_file_copy "${i}" && \
-      echo "Скопирован файл: ${i}"
+    f_file_copy "${i}" \
+      && echo "Скопирован файл: ${i}" \
+      || echo "ОШИБКА при копировании файла: ${i}"
 
-done < <(${dpkg} -L "${pkg}")
+done < <($dpkg -L "${pkg}")

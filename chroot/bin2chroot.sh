@@ -72,6 +72,7 @@ echo "Рабочая директория: ${target_dir}"
 
 f_dependencies () {
   ldd $1 | grep -v -P '^\tlinux-vdso.so.1' | tr -d "\t"
+  return 0
 }
 
 f_parse_dep_line () {
@@ -91,29 +92,31 @@ f_parse_dep_line () {
      echo "${intermidiate:1:-21}"
    fi
 
-   if [ -n "${staticly_linked}" ]
-   then
-     echo ''
-   fi
+   [ -n "${staticly_linked}" ] && echo ''
+   return 0
 }
 
 f_copy_bin () {
-  ${cp} --parents --update "$1" "${target_dir}"
+  $cp --parents --update "$1" "${target_dir}"
+  return 0
 }
 
 # Вот за такие вещи я и недолюбливаю bash. Обходим некрасивости его
 # организации работы с массивами через функции.
 f_stack_top_value () {
   echo "${stack[((${#stack[@]}-1))]}"
+  return 0
 }
 
 f_stack_top_index () {
   let stack_top_index=${#stack[@]}-1
   echo "${stack_top_index}"
+  return 0
 }
 
 f_stack_count () {
   echo "${#stack[@]}"
+  return 0
 }
 
 # Проверяет присутствие элемента в списке
@@ -129,6 +132,7 @@ f_check4duplicity () {
     [ "${dupes[i]}" == "${value}" ] && { found="true"; break; }
   done
   echo ${found}
+  return 0
 }
 
 # Функция исключительно для дебага
@@ -149,6 +153,7 @@ f_look_around_stack () {
         echo "В стеке больше нет элементов"
   fi
   echo "--->"
+  return 0
 }
 
 ##### MAIN #####################################################################
